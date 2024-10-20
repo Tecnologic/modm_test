@@ -1,0 +1,10 @@
+/**
+
+@ingroup modm_ui
+@defgroup modm_ui_animation Animators
+
+lbuild module: `modm:ui:animation`
+
+Various classes for animating values.
+
+ */

@@ -1,0 +1,8 @@
+*.o
+*.elf
+*.log
+*.bin
+*.a
+*.map
+*.lst
+*.d
