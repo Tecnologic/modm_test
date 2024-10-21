@@ -7,6 +7,7 @@ __all__ = [
     "elf2uf2",
     "find_files",
     "gdb",
+    "info",
     "itm",
     "jlink",
     "openocd",
@@ -22,6 +23,7 @@ from . import crashdebug
 from . import elf2uf2
 from . import find_files
 from . import gdb
+from . import info
 from . import itm
 from . import jlink
 from . import openocd

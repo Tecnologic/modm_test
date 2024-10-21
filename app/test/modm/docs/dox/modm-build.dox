@@ -619,12 +619,12 @@ Generated with: `[] in [Path]`
 - `Info`: generates information about the last commit.
 - `Info+Status`: like `Info` plus git file status.
 
-Generated with: `Disabled in [Disabled, Info, Info+Status]`
+Generated with: `Info+Status in [Disabled, Info, Info+Status]`
 ### modm:build:info.build: Generate build state information
 
 
 
-Generated with: `no in [yes, no]`
+Generated with: `true in [yes, no]`
 ### modm:build:openocd.cfg: Path to a custom OpenOCD configuration file
 
 If you have a custom configuration file for your target, it will get included

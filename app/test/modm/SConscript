@@ -31,6 +31,7 @@ env.Tool("elf2uf2")
 env.Tool("find_files")
 env.Tool("gcc_retarget")
 env.Tool("gdb")
+env.Tool("info")
 env.Tool("jlink")
 env.Tool("openocd")
 env.Tool("qtcreator")
@@ -80,9 +81,7 @@ env["CCFLAGS"] = [
     "-Werror=sign-compare",
     "-Wextra",
     "-Wlogical-op",
-    "-Wno-double-promotion",
     "-Wno-redundant-decls",
-    "-Wpedantic",
     "-Wpointer-arith",
     "-Wundef",
 ]
@@ -193,6 +192,7 @@ env.AppendUnique(CPPPATH=[
     abspath("ext\\cmsis\\core"),
     abspath("ext\\cmsis\\device"),
     abspath("ext\\gcc"),
+    abspath("ext\\tinyusb"),
     abspath("src"),
 ])
 
@@ -201,6 +201,14 @@ files = [
     env.File("ext\\gcc\\cabi.c"),
     env.File("ext\\gcc\\cxxabi.cpp"),
     env.File("ext\\gcc\\new_delete.cpp"),
+    env.File("ext\\tinyusb\\class\\cdc\\cdc_device.c"),
+    env.File("ext\\tinyusb\\common\\tusb_fifo.c"),
+    env.File("ext\\tinyusb\\device\\usbd.c"),
+    env.File("ext\\tinyusb\\device\\usbd_control.c"),
+    env.File("ext\\tinyusb\\portable\\synopsys\\dwc2\\dcd_dwc2.c"),
+    env.File("ext\\tinyusb\\tusb.c"),
+    env.File("ext\\tinyusb\\tusb_descriptors.c"),
+    env.File("ext\\tinyusb\\tusb_port.cpp"),
     env.File("src\\modm\\architecture\\driver\\atomic\\flag.cpp"),
     env.File("src\\modm\\board\\board.cpp"),
     env.File("src\\modm\\container\\smart_pointer.cpp"),

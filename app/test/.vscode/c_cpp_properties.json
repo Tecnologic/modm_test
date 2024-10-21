@@ -7,7 +7,8 @@
                 "${workspaceFolder}/modm/ext/cmsis/core",
                 "${workspaceFolder}/modm/ext/cmsis/device",
                 "${workspaceFolder}/modm/ext/gcc",
-                "${workspaceFolder}/modm/src"
+                "${workspaceFolder}/modm/src",
+                "${workspaceFolder}/modm/ext/tinyusb"
             ],
             "defines": [
                 "STM32F4"
@@ -30,7 +31,8 @@
                 "${workspaceFolder}/modm/ext/cmsis/core",
                 "${workspaceFolder}/modm/ext/cmsis/device",
                 "${workspaceFolder}/modm/ext/gcc",
-                "${workspaceFolder}/modm/src"
+                "${workspaceFolder}/modm/src",
+                "${workspaceFolder}/modm/ext/tinyusb"
             ],
             "defines": [
                 "MODM_DEBUG_BUILD",

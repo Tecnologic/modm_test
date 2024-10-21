@@ -32,6 +32,7 @@
 #include "interface/spi_device.hpp"
 #include "interface/spi_lock.hpp"
 #include "interface/spi_master.hpp"
+#include "interface/uart.hpp"
 #include "interface/peripheral.hpp"
 
 #endif	// MODM_INTERFACE_HPP

@@ -35,4 +35,5 @@
 #include "platform/timer/basic_base.hpp"
 #include "platform/timer/general_purpose_base.hpp"
 #include "platform/timer/timer_4.hpp"
+#include "platform/usb/uart.hpp"
 #include "platform/usb/usb_fs.hpp"

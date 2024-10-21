@@ -37,6 +37,8 @@ env.Alias("library", libraries)
 env.Append(CPPPATH=abspath("."))
 ignored = [".lbuild_cache", env["CONFIG_BUILD_BASE"]] + generated_paths
 sources = []
+sources.append(env.InfoGit(with_status=True))
+sources.append(env.InfoBuild())
 # Finding application sources
 sources += env.FindSourceFiles(".", ignorePaths=ignored)
 # So you want to add or remove compile options?

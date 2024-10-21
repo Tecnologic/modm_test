@@ -1,0 +1,21 @@
+/**
+
+@ingroup modm_tinyusb
+@defgroup modm_tinyusb_device TinyUSB in Device Mode
+
+lbuild module: `modm:tinyusb:device`
+
+Configuration options:
+
+- `CFG_TUD_ENDPOINT0_SIZE` = 64
+- `CFG_TUD_EP_MAX` = 9
+- `CFG_TUD_TASK_QUEUE_SZ` = 16
+
+## Module Options
+
+### modm:tinyusb:device:port: USB Port selection
+
+
+
+Generated with: `fs in [fs, hs]`
+ */

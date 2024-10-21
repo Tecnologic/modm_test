@@ -4,7 +4,7 @@
         {
             "name": "Debug (Release, Scons, STM32F407VGT6)",
             "cwd": "${workspaceFolder}",
-            "executable": "build\test/scons-release/test.elf",
+            "executable": "build/test/scons-release/test.elf",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
@@ -17,7 +17,7 @@
         {
             "name": "Debug (Debug, Scons, STM32F407VGT6)",
             "cwd": "${workspaceFolder}",
-            "executable": "build\test/scons-debug/test.elf",
+            "executable": "build/test/scons-debug/test.elf",
             "request": "launch",
             "type": "cortex-debug",
             "servertype": "openocd",
