@@ -9,7 +9,11 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "device": "STM32F407VGT6",
-            "runToMain": true,
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "runToEntryPoint": "main",
             "configFiles": [
                 "modm/openocd.cfg",
             ],
@@ -22,7 +26,11 @@
             "type": "cortex-debug",
             "servertype": "openocd",
             "device": "STM32F407VGT6",
-            "runToMain": true,
+            "liveWatch": {
+                "enabled": true,
+                "samplesPerSecond": 4
+            },
+            "runToEntryPoint": "main",
             "configFiles": [
                 "modm/openocd.cfg",
             ],

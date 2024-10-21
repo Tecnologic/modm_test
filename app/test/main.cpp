@@ -74,6 +74,8 @@ modm::ui::Animation<uint16_t> periodAnimator(period,
 // wrap it in a pulse
 modm::ui::Pulse<uint16_t> pulsePeriod(periodAnimator);
 
+volatile std::uint32_t i = 0;
+
 // ----------------------------------------------------------------------------
 int
 main()
@@ -127,7 +129,6 @@ main()
 
 	while (true)
 	{
-		static std::uint32_t i = 0;
 		i++;
 		MODM_LOG_ERROR << "loop " << i << modm::endl;
 		tud_task();
