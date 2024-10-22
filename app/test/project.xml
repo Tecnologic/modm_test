@@ -8,19 +8,20 @@
     <option name="modm:build:info.build">True</option>
     <option name="modm:build:info.git">Info+Status</option>
     <option name="modm:target">stm32f407vgt6</option>
-    <option name="modm:ui:led:gamma">2.2,2.0</option>
-    <option name="modm:ui:led:bit">14,8,16</option>
-    <option name="modm:ui:led:range">10,100,256</option>
     <option name="modm:tinyusb:config">device.cdc</option>
+    <option name="modm:communication:amnb:with_heap">False</option>
   </options>
   <modules>
     <module>modm:build:scons</module>
     <module>modm:debug</module>
     <module>modm:board:disco-f407vg</module>
-    <module>modm:docs</module>
-    <module>modm:platform:timer:4</module>
-    <module>modm:ui:led</module>
-    <module>modm:ui:animation</module>
+    <module>modm:platform:gpio</module>
+    <module>modm:communication:amnb</module>
+    <module>modm:platform:uart:1</module>
+    <module>modm:platform:uart:3</module>
+    <module>modm:platform:uart:4</module>
+    <module>modm:build:scons</module>
+    <module>modm:processing:fiber</module>
     <module>modm:tinyusb</module>
   </modules>
 </library>

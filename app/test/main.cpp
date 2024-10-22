@@ -13,15 +13,18 @@
 #include <tusb.h>
 
 #include <modm/board.hpp>
+#include <modm/communication/amnb.hpp>
 #include <modm/debug.hpp>
 #include <modm/processing.hpp>
-#include <modm/ui/animation.hpp>
-#include <modm/ui/led.hpp>
 
 // ----------------------------------------------------------------------------
 // Set the log level
 #undef MODM_LOG_LEVEL
 #define MODM_LOG_LEVEL modm::log::INFO
+
+using Usart1 = BufferedUart<UsartHal1, UartRxBuffer<32>>;
+using Usart3 = BufferedUart<UsartHal3, UartRxBuffer<16>>;
+using Usart4 = BufferedUart<UartHal4>;
 
 // ----------------------------------------------------------------------------
 modm::IODeviceWrapper<UsbUart0, modm::IOBuffer::BlockIfFull> usb_io_device;
@@ -32,49 +35,76 @@ modm::log::Logger modm::log::info(usb_io_device);
 modm::log::Logger modm::log::warning(usb_io_device);
 modm::log::Logger modm::log::error(usb_io_device);
 
-// create the leds with these lambda callbacks
-modm::ui::Led orange([](uint8_t brightness) {
-	Timer4::setCompareValue<Board::LedOrange::Ch2>(modm::ui::table22_16_256[brightness]);
-});
-
-modm::ui::Led red([](uint8_t brightness) {
-	Timer4::setCompareValue<Board::LedRed::Ch3>(modm::ui::table22_16_256[brightness]);
-});
-
-modm::ui::Led green([](uint8_t brightness) {
-	Timer4::setCompareValue<Board::LedGreen::Ch1>(modm::ui::table22_16_256[brightness]);
-});
-
-modm::ui::Led blue([](uint8_t brightness) {
-	Timer4::setCompareValue<Board::LedBlue::Ch4>(modm::ui::table22_16_256[brightness]);
-});
 // ----------------------------------------------------------------------------
+modm::amnb::Listener listeners[] = {
+	{1,
+	 [](uint8_t sender, const uint32_t& data) {
+		 MODM_LOG_INFO << "Node2 and Node3 received Broadcast 1 from '" << sender;
+		 MODM_LOG_INFO << "': " << data << modm::endl;
+	 }},
+	{2,
+	 [](uint8_t sender) {
+		 MODM_LOG_INFO << "Node2 and Node3 received Broadcast 2 from '" << sender << "'"
+					   << modm::endl;
+	 }},
+};
+modm::amnb::Action actions[] = {
+	{1,
+	 []() -> modm::amnb::Response {
+		 static uint8_t counter{0};
+		 MODM_LOG_INFO << "Node1 and Node3 received Action 1" << modm::endl;
+		 return counter++;
+	 }},
+	{2,
+	 [](const uint32_t& data) -> modm::amnb::Response {
+		 static uint8_t counter{0};
+		 MODM_LOG_INFO << "Node1 and Node3 received Action 2 with argument: " << data << modm::endl;
+		 return modm::amnb::ErrorResponse(counter++);
+	 }},
+};
 
-// apply some animations to the leds
-modm::ui::Pulse<uint8_t> pulse(red);
-modm::ui::Indicator<uint8_t> indicator(blue);
-modm::ui::Strobe<uint8_t> strobe(green);
+// Two nodes on the same device on different UARTs of course!
+modm::amnb::DeviceWrapper<Usart1> device1;
+modm::amnb::DeviceWrapper<Usart3> device2;
+modm::amnb::DeviceWrapper<Usart4> device3;
+modm::amnb::Node node1(device1, 1, actions);
+modm::amnb::Node node2(device2, 2, listeners);
+modm::amnb::Node node3(device3, 3, actions, listeners);
 
-// Now for some custom animators
-using KeyFrame = modm::ui::KeyFrame<uint8_t>;
-using KeyFrameAnimation = modm::ui::KeyFrameAnimation<uint8_t>;
+// You need to connect D1 with D15 and with A0
+using PinNode1 = GpioA9;   // D1
+using PinNode2 = GpioC10;  // D15
+using PinNode3 = GpioA0;   // A0
 
-// custom keyframes (time, value) for the orange led
-const KeyFrame frames[] = {KeyFrame(1000, 50), KeyFrame(900, 0),   KeyFrame(800, 100),
-						   KeyFrame(700, 0),   KeyFrame(600, 150), KeyFrame(500, 0),
-						   KeyFrame(400, 200), KeyFrame(300, 0),   KeyFrame(200, 250),
-						   KeyFrame(100, 0)};
-// create a new keyframe animator for the orange led
-KeyFrameAnimation keyFrames(frames, orange);
+void update()
+{
+	uint32_t counter{0};
+	modm::amnb::Result<uint8_t> res1;
+	modm::amnb::Result<uint8_t, uint8_t> res2;
 
-// animate the period of the red pulse (Aniception?)
-static uint16_t period = 500;
-modm::ui::Animation<uint16_t> periodAnimator(period,
-											 [](uint16_t period) { pulse.setPeriod(period); });
-// wrap it in a pulse
-modm::ui::Pulse<uint16_t> pulsePeriod(periodAnimator);
+	while (true)
+	{
+		modm::this_fiber::sleep_for(1s);
 
-volatile std::uint32_t i = 0;
+		Board::LedGreen::toggle();
+		node1.broadcast(1, counter++);
+		node3.broadcast(2);
+
+		res1 = node2.request<uint8_t>(1, 1);
+		MODM_LOG_INFO << "Node1 responded with: " << res1.error();
+		if (res1) { MODM_LOG_INFO << " " << *res1 << modm::endl; }
+
+		res2 = node1.request<uint8_t, uint8_t>(3, 2, counter);
+		MODM_LOG_INFO << "Node3 responded with: " << res2.error();
+		if (res2.hasUserError()) { MODM_LOG_INFO << " " << *res2.userError() << modm::endl; }
+	}
+}
+
+modm::Fiber<> fiberNode1(+[](){ node1.update(); });
+modm::Fiber<> fiberNode2(+[](){ node1.update(); });
+modm::Fiber<> fiberNode3(+[](){ node1.update(); });
+modm::Fiber<> fiberMangement(update);
+modm::Fiber<> fiberUSB(+[](){ tud_task(); Board::LedOrange::toggle(); modm::this_fiber::yield(); });
 
 // ----------------------------------------------------------------------------
 int
@@ -85,62 +115,39 @@ main()
 
 	tusb_init();
 
-	// connect the Timer Channels to the LEDs
-	Timer4::connect<Board::LedGreen::Ch1, Board::LedOrange::Ch2, Board::LedRed::Ch3,
-					Board::LedBlue::Ch4>();
+	Board::LedOrange::setOutput();
+	Board::LedGreen::setOutput();
 
-	// set up the timer for 16bit PWM
-	Timer4::enable();
-	Timer4::setMode(Timer4::Mode::UpCounter);
+	Usart1::connect<PinNode1::Tx>();
+	Usart1::initialize<Board::SystemClock, 115200>(Usart1::Parity::Even, Usart1::WordLength::Bit9);
+	// Use Single-Wire Half-Duplex Mode
+	PinNode1::configure(Gpio::OutputType::OpenDrain);
+	PinNode1::configure(Gpio::InputType::PullUp);
+	USART1->CR1 &= ~USART_CR1_UE;
+	USART1->CR3 = USART_CR3_HDSEL;
+	USART1->CR1 |= USART_CR1_UE;
 
-	// 42 MHz / 1 / 2^16 ~ 640 Hz refresh rate
-	Timer4::setPrescaler(1);
-	Timer4::setOverflow(65535);
-	// configure the output channels
-	Timer4::configureOutputChannel<Board::LedGreen::Ch1>(Timer4::OutputCompareMode::Pwm, 0);
-	Timer4::configureOutputChannel<Board::LedOrange::Ch2>(Timer4::OutputCompareMode::Pwm, 0);
-	Timer4::configureOutputChannel<Board::LedRed::Ch3>(Timer4::OutputCompareMode::Pwm, 0);
-	Timer4::configureOutputChannel<Board::LedBlue::Ch4>(Timer4::OutputCompareMode::Pwm, 0);
-	Timer4::applyAndReset();
-	// start the timer
-	Timer4::start();
+	Usart3::connect<PinNode2::Tx>();
+	Usart3::initialize<Board::SystemClock, 115200>(Usart1::Parity::Even, Usart1::WordLength::Bit9);
+	// Use Single-Wire Half-Duplex Mode
+	PinNode2::configure(Gpio::OutputType::OpenDrain);
+	PinNode2::configure(Gpio::InputType::PullUp);
+	USART3->CR1 &= ~USART_CR1_UE;
+	USART3->CR3 = USART_CR3_HDSEL;
+	USART3->CR1 |= USART_CR1_UE;
 
-	// set the animation mode for autoreverse the keyframes
-	keyFrames.setMode(modm::ui::KeyFrameAnimationMode::Autoreverse);
-	// set the indicator period change to 15s
-	pulsePeriod.setPeriod(10000);
-	// pulse between 0.5s and 5s.
-	pulsePeriod.setRange(500, 5000);
-	indicator.setRange(0, 100);
-
-	// start all animations indefinitely
-	pulse.start();
-	indicator.start();
-	strobe.start();
-	keyFrames.start();
-	pulsePeriod.start();
-
-	// Use the logging streams to print some messages.
-	// Change MODM_LOG_LEVEL above to enable or disable these messages
-	MODM_LOG_DEBUG << "debug" << modm::endl;
-	MODM_LOG_INFO << "info" << modm::endl;
-	MODM_LOG_WARNING << "warning" << modm::endl;
-	MODM_LOG_ERROR << "error" << modm::endl;
+	Usart4::connect<PinNode3::Tx>();
+	Usart4::initialize<Board::SystemClock, 115200>(Usart1::Parity::Even, Usart1::WordLength::Bit9);
+	// Use Single-Wire Half-Duplex Mode
+	PinNode3::configure(Gpio::OutputType::OpenDrain);
+	PinNode3::configure(Gpio::InputType::PullUp);
+	UART4->CR1 &= ~USART_CR1_UE;
+	UART4->CR3 = USART_CR3_HDSEL;
+	UART4->CR1 |= USART_CR1_UE;
 
 	while (true)
 	{
-		i++;
-		MODM_LOG_ERROR << "loop " << i << modm::endl;
-		tud_task();
-
-		// update all standard animations
-		pulse.update();
-		indicator.update();
-		strobe.update();
-
-		// update the custom animations
-		keyFrames.update();
-		pulsePeriod.update();
+		modm::fiber::Scheduler::run();	
 	}
 
 	return 0;
