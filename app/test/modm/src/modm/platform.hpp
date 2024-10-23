@@ -36,7 +36,7 @@
 #include "platform/uart/uart_base.hpp"
 #include "platform/uart/uart_buffer.hpp"
 #include "platform/uart/uart_hal_1.hpp"
+#include "platform/uart/uart_hal_2.hpp"
 #include "platform/uart/uart_hal_3.hpp"
-#include "platform/uart/uart_hal_4.hpp"
 #include "platform/usb/uart.hpp"
 #include "platform/usb/usb_fs.hpp"
