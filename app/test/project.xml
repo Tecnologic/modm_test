@@ -10,6 +10,7 @@
     <option name="modm:target">stm32f407vgt6</option>
     <option name="modm:tinyusb:config">device.cdc</option>
     <option name="modm:communication:amnb:with_heap">False</option>
+    <option name="modm:processing:protothread:use_fiber">True</option>
   </options>
   <modules>
     <module>modm:build:scons</module>
@@ -22,6 +23,8 @@
     <module>modm:platform:uart:3</module>
     <module>modm:build:scons</module>
     <module>modm:processing:protothread</module>
+    <module>modm:processing:resumable</module>
+    <module>modm:processing:fiber</module>
     <module>modm:tinyusb</module>
   </modules>
 </library>

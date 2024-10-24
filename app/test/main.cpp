@@ -86,7 +86,15 @@ using PinNode1 = GpioB6;
 using PinNode2 = GpioD5;
 using PinNode3 = GpioC10;
 
-class Thread : public modm::pt::Protothread
+template< uint8_t Functions >
+bool modm::Resumable<Functions>::isResumableRunning(uint8_t id) const
+{
+	(void)id;
+	return false;
+}
+
+class Thread
+	: public modm::pt::Protothread
 {
 	modm::ShortPeriodicTimer tmr{1s};
 	uint32_t counter{0};
